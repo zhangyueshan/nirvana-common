@@ -1,6 +1,5 @@
 package com.nirvana.common.utils;
 
-import org.apache.http.Header;
 import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.InputStreamEntity;
@@ -61,7 +60,6 @@ public class HttpProxy {
         HttpGet get = new HttpGet(getUri(request0));
         setHeaders(get, request0);
         CloseableHttpResponse response = client.execute(get);
-        setHeaders(response0, response);
         response.getEntity().writeTo(response0.getOutputStream());
     }
 
@@ -70,7 +68,6 @@ public class HttpProxy {
         setHeaders(post, request0);
         post.setEntity(new InputStreamEntity(request0.getInputStream()));
         CloseableHttpResponse response = client.execute(post);
-        setHeaders(response0, response);
         response.getEntity().writeTo(response0.getOutputStream());
     }
 
@@ -79,7 +76,6 @@ public class HttpProxy {
         setHeaders(put, request0);
         put.setEntity(new InputStreamEntity(request0.getInputStream()));
         CloseableHttpResponse response = client.execute(put);
-        setHeaders(response0, response);
         response.getEntity().writeTo(response0.getOutputStream());
     }
 
@@ -87,7 +83,6 @@ public class HttpProxy {
         HttpDelete delete = new HttpDelete(getUri(request0));
         setHeaders(delete, request0);
         CloseableHttpResponse response = client.execute(delete);
-        setHeaders(response0, response);
         response.getEntity().writeTo(response0.getOutputStream());
     }
 
@@ -114,12 +109,6 @@ public class HttpProxy {
             if (!header.equalsIgnoreCase("Transfer-Encoding") && !header.equalsIgnoreCase("Content-Length")) {
                 request.setHeader(header, request0.getHeader(header));
             }
-        }
-    }
-
-    private void setHeaders(HttpServletResponse response0, CloseableHttpResponse response) {
-        for (Header header : response.getAllHeaders()) {
-            response0.setHeader(header.getName(), header.getValue());
         }
     }
 

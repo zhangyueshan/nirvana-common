@@ -13,14 +13,10 @@ import java.util.List;
  */
 public class PackageHelper {
 
-    /**
-     * 包名。
-     */
+    /*包名*/
     private String packageName;
 
-    /**
-     * 是否深入子包。
-     */
+    /*是否深入子包*/
     private boolean childPackage;
 
     public PackageHelper(String packageName) {
@@ -76,19 +72,28 @@ public class PackageHelper {
             for (File childFile : childFiles) {
                 if (childFile.isDirectory()) {
                     if (childPackage) {
-                        List<Class<?>> list = getDirectoryPathClasses(childFile.getPath(), packageName + "." + childFile.getName());
+                        String childPath = childFile.getName();
+                        if (StringUtils.isNotBlank(packageName)) {
+                            childPath = packageName + "." + childPath;
+                        }
+                        List<Class<?>> list = getDirectoryPathClasses(childFile.getPath(), childPath);
                         classes.addAll(list);
                     }
                 } else {
                     String name = childFile.getName();
-                    String className = packageName + "." + (name.substring(0, name.indexOf(".class")));
+                    if (!name.endsWith(".class")) {
+                        continue;
+                    }
+                    String className = name.substring(0, name.indexOf(".class"));
+                    if (StringUtils.isNoneBlank(packageName)) {
+                        className = packageName + "." + className;
+                    }
                     Class<?> clazz;
                     try {
                         clazz = loader.loadClass(className);
                         classes.add(clazz);
                     } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                        throw new RuntimeException("获取Package中类发生异常。");
+                        throw new RuntimeException(e);
                     }
                 }
             }
