@@ -1,5 +1,6 @@
-package com.nirvana.common.utils;
+package com.nirvana.common.utils.scanner;
 
+import com.nirvana.common.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,20 +42,26 @@ public class PackageScanner {
 
     private String basePackage;
     private ClassLoader classLoader = getClass().getClassLoader();
+    private ClassFilter classFilter;
 
     private boolean scanJar;
 
     public PackageScanner() {
-        this("");
+        this(new TrueFilter());
     }
 
-    public PackageScanner(String basePackage) {
-        this(basePackage, true);
+    public PackageScanner(ClassFilter filter) {
+        this("", filter);
     }
 
-    public PackageScanner(String basePackage, boolean scanJar) {
+    public PackageScanner(String basePackage, ClassFilter filter) {
+        this(basePackage, true, filter);
+    }
+
+    public PackageScanner(String basePackage, boolean scanJar, ClassFilter filter) {
         this.basePackage = basePackage;
         this.scanJar = scanJar;
+        this.classFilter = filter;
     }
 
     public Collection<Class<?>> scan() {
@@ -65,10 +72,10 @@ public class PackageScanner {
                 File file = new File(URLDecoder.decode(url.getFile(), "UTF8"));
                 if (!file.isDirectory() && file.getName().endsWith(".jar")) {
                     if (scanJar) {
-                        fuckJar(classes, new JarFile(file));
+                        fuckJar(classes, new JarFile(file), classFilter);
                     }
                 } else {
-                    fuckFile(classes, file, "");
+                    fuckFile(classes, file, "", classFilter);
                 }
             }
             return classes;
@@ -77,7 +84,7 @@ public class PackageScanner {
         }
     }
 
-    private void fuckFile(Collection<Class<?>> classes, File file, String javaTypeName) {
+    private void fuckFile(Collection<Class<?>> classes, File file, String javaTypeName, ClassFilter filter) {
         if (!match(basePackage, javaTypeName)) {
             return;
         }
@@ -89,23 +96,25 @@ public class PackageScanner {
                     if (StringUtils.isNotBlank(javaTypeName)) {
                         childPrefix = javaTypeName + "." + childPrefix;
                     }
-                    fuckFile(classes, childFile, childPrefix);
+                    fuckFile(classes, childFile, childPrefix, filter);
                 }
             }
         } else {
             if (javaTypeName.endsWith(".class")) {
                 String className = javaTypeName.substring(0, javaTypeName.lastIndexOf(".class"));
-                if (!filterClass(className)) {
-                    loadClass(classes, className);
+                if (checkClassName(className)) {
+                    loadClass(classes, className, filter);
                 }
             }
         }
     }
 
-    private void loadClass(Collection<Class<?>> classes, String className) {
+    private void loadClass(Collection<Class<?>> classes, String className, ClassFilter filter) {
         try {
             Class<?> clazz = classLoader.loadClass(className);
-            classes.add(clazz);
+            if (filter.leave(clazz)) {
+                classes.add(clazz);
+            }
         } catch (ClassNotFoundException e) {
             LOGGER.debug("class not found exception: {}", className);
         } catch (NoClassDefFoundError e) {
@@ -115,22 +124,22 @@ public class PackageScanner {
         }
     }
 
-    private void fuckJar(Collection<Class<?>> classes, JarFile jarFile) {
+    private void fuckJar(Collection<Class<?>> classes, JarFile jarFile, ClassFilter filter) {
         Enumeration<JarEntry> entries = jarFile.entries();
         while (entries.hasMoreElements()) {
             JarEntry jarEntry = entries.nextElement();
             String entryName = jarEntry.getName();
             if (entryName.endsWith(".class")) {
                 String className = entryName.replace("/", ".").substring(0, entryName.lastIndexOf(".class"));
-                if (!filterClass(className)) {
-                    loadClass(classes, className);
+                if (checkClassName(className)) {
+                    loadClass(classes, className, filter);
                 }
             }
         }
     }
 
-    private boolean filterClass(String className) {
-        return (StringUtils.isNoneBlank(basePackage) && !className.startsWith(basePackage + ".")) || inExcludePackages(className);
+    private boolean checkClassName(String className) {
+        return (!StringUtils.isNoneBlank(basePackage) || className.startsWith(basePackage + ".")) && !inExcludePackages(className);
     }
 
     private boolean inExcludePackages(String className) {
