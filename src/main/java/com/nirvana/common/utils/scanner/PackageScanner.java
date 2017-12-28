@@ -72,10 +72,10 @@ public class PackageScanner {
                 File file = new File(URLDecoder.decode(url.getFile(), "UTF8"));
                 if (!file.isDirectory() && file.getName().endsWith(".jar")) {
                     if (scanJar) {
-                        fuckJar(classes, new JarFile(file), classFilter);
+                        scanJar(classes, new JarFile(file), classFilter);
                     }
                 } else {
-                    fuckFile(classes, file, "", classFilter);
+                    scanFile(classes, file, "", classFilter);
                 }
             }
             return classes;
@@ -84,7 +84,7 @@ public class PackageScanner {
         }
     }
 
-    private void fuckFile(Collection<Class<?>> classes, File file, String javaTypeName, ClassFilter filter) {
+    private void scanFile(Collection<Class<?>> classes, File file, String javaTypeName, ClassFilter filter) {
         if (!match(basePackage, javaTypeName)) {
             return;
         }
@@ -96,7 +96,7 @@ public class PackageScanner {
                     if (StringUtils.isNotBlank(javaTypeName)) {
                         childPrefix = javaTypeName + "." + childPrefix;
                     }
-                    fuckFile(classes, childFile, childPrefix, filter);
+                    scanFile(classes, childFile, childPrefix, filter);
                 }
             }
         } else {
@@ -124,7 +124,7 @@ public class PackageScanner {
         }
     }
 
-    private void fuckJar(Collection<Class<?>> classes, JarFile jarFile, ClassFilter filter) {
+    private void scanJar(Collection<Class<?>> classes, JarFile jarFile, ClassFilter filter) {
         Enumeration<JarEntry> entries = jarFile.entries();
         while (entries.hasMoreElements()) {
             JarEntry jarEntry = entries.nextElement();
