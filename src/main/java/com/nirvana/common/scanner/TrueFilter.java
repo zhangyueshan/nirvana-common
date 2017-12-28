@@ -1,4 +1,4 @@
-package com.nirvana.common.utils.scanner;
+package com.nirvana.common.scanner;
 
 /**
  * Created by Nirvana on 2017/12/15.

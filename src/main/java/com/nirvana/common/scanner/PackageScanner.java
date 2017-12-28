@@ -1,4 +1,4 @@
-package com.nirvana.common.utils.scanner;
+package com.nirvana.common.scanner;
 
 import com.nirvana.common.utils.StringUtils;
 import org.slf4j.Logger;
