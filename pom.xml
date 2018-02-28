@@ -73,8 +73,43 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/com.belerweb/pinyin4j -->
+        <dependency>
+            <groupId>com.belerweb</groupId>
+            <artifactId>pinyin4j</artifactId>
+            <version>2.5.1</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/commons-collections/commons-collections -->
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.2.2</version>
+        </dependency>
 
     </dependencies>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>${distMgmtSnapshotsId}</id>
+            <name>${distMgmtSnapshotsName}</name>
+            <url>${distMgmtSnapshotsUrl}</url>
+        </snapshotRepository>
+        <repository>
+            <id>${distMgmtStagingId}</id>
+            <name>${distMgmtStagingName}</name>
+            <url>${distMgmtStagingUrl}</url>
+        </repository>
+    </distributionManagement>
+
+    <properties>
+        <distMgmtStagingId>transwarp-release</distMgmtStagingId>
+        <distMgmtStagingName>public-libs-release-local</distMgmtStagingName>
+        <distMgmtStagingUrl>http://172.16.1.168:8081/artifactory/libs-release-local</distMgmtStagingUrl>
+        <distMgmtSnapshotsId>transwarp-snapshots</distMgmtSnapshotsId>
+        <distMgmtSnapshotsName>public-libs-snapshot-local</distMgmtSnapshotsName>
+        <distMgmtSnapshotsUrl>http://172.16.1.168:8081/artifactory/libs-snapshot-local</distMgmtSnapshotsUrl>
+    </properties>
 
     <build>
         <finalName>nirvana-common</finalName>
